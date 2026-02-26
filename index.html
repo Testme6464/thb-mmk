@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thai-MMK LED Smart Live</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Pyidaungsu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --viber: #7360f2; --telegram: #0088cc; --messenger: #0084ff; --led-green: #00ff41; --led-yellow: #ffeb3b; }
+        
+        body {
+            font-family: 'Pyidaungsu', sans-serif;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #0f0c29, #1a1a2e, #0f0c29);
+            color: white; overflow-x: hidden;
+        }
+
+        .header { text-align: center; margin-top: 15px; }
+        .header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; letter-spacing: 2px; }
+        #live-clock { font-size: 0.75rem; font-family: 'Orbitron', sans-serif; color: var(--led-green); opacity: 0.7; }
+
+        /* Price Card */
+        .price-card {
+            background: rgba(0, 0, 0, 0.5);
+            width: 90%; max-width: 350px;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.1);
+            margin: 15px 0; padding: 20px 10px;
+            text-align: center; border: 1.5px solid rgba(0, 255, 65, 0.4);
+            box-sizing: border-box;
+        }
+
+        #admin-status { font-size: 0.9rem; color: var(--led-yellow); margin-bottom: 12px; font-weight: bold; text-shadow: 0 0 5px var(--led-yellow); }
+        .price-title { font-size: 0.75rem; margin-bottom: 10px; color: #bbb; }
+        
+        .price-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem; 
+            font-weight: bold;
+            color: var(--led-green);
+            white-space: nowrap;
+            text-shadow: 0 0 8px var(--led-green);
+            display: block; margin: 8px 0;
+        }
+
+        /* Smart Calculator Section */
+        .calc-section {
+            background: rgba(255, 255, 255, 0.03);
+            width: 90%; max-width: 350px;
+            padding: 15px; border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px; box-sizing: border-box;
+        }
+        .calc-section h3 { font-size: 0.75rem; text-align: center; margin: 0 0 15px 0; color: #888; border-bottom: 1px solid #333; padding-bottom: 8px; font-family: 'Orbitron', sans-serif;}
+        
+        .input-group { margin: 12px 0; }
+        .input-label { font-size: 0.65rem; color: #777; display: block; text-align: left; margin-bottom: 3px; padding-left: 10px;}
+        
+        .calc-input {
+            width: 92%; padding: 12px; 
+            background: rgba(0,0,0,0.6);
+            border: 1px solid #333; border-radius: 8px;
+            color: var(--led-green); font-family: 'Orbitron', sans-serif;
+            font-size: 1rem; text-align: center; outline: none;
+            display: block; margin: 0 auto;
+        }
+        .rate-input { color: var(--led-yellow); border-color: rgba(255, 235, 59, 0.3); }
+
+        /* Calculate & Clear Buttons */
+        .btn-container { display: flex; gap: 10px; width: 92%; margin: 15px auto 0; }
+        .calc-btn { flex: 2; padding: 12px; background: var(--led-green); color: #000; border: none; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer; }
+        .clear-btn { flex: 1; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* Promo Section */
+        #promo-section { width: 90%; max-width: 350px; margin-bottom: 80px; text-align: center; }
+        #promo-banner { width: 100%; border-radius: 10px; margin-bottom: 12px; display: none; }
+        #promo-text { font-size: 0.85rem; color: #eee; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border-left: 3px solid var(--led-yellow); display: none; text-align: left; }
+
+        /* Floating Icons */
+        .floating-container { position: fixed; bottom: 20px; right: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
+        .fab { width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; text-decoration: none; font-size: 22px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .viber { background: var(--viber); } .telegram { background: var(--telegram); } .messenger { background: var(--messenger); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>EXCHANGE RATE</h1>
+        <div id="live-clock">LOADING...</div>
+    </div>
+
+    <div class="price-card">
+        <div id="admin-status">ယနေ့ နေ့လည် ၁၂ နာရီဈေး</div>
+        <div class="price-title">ယနေ့ ငွေလဲနှုန်းထားများ</div>
+        <div class="price-value" id="thb-to-mmk-display">1 THB - 130 MMK</div>
+        <div style="height: 1px; background: rgba(0, 255, 65, 0.15); width: 40%; margin: 8px auto;"></div>
+        <div class="price-value" id="mmk-to-thb-display">100,000 MMK - 769.23 THB</div>
+    </div>
+
+    <div class="calc-section">
+        <h3>SMART CALCULATOR</h3>
+        
+        <div class="input-group">
+            <span class="input-label">Custom Rate (1 THB - ? MMK)</span>
+            <input type="number" step="0.01" id="calc-rate" class="calc-input rate-input" placeholder="0.00">
+        </div>
+
+        <div class="input-group">
+            <span class="input-label">Thai Baht (THB)</span>
+            <input type="number" step="0.01" id="calc-thb" class="calc-input" placeholder="0.00">
+        </div>
+
+        <div class="input-group">
+            <span class="input-label">Myanmar Kyat (MMK)</span>
+            <input type="number" step="0.01" id="calc-mmk" class="calc-input" placeholder="0.00">
+        </div>
+
+        <div class="btn-container">
+            <button class="calc-btn" onclick="performSmartCalc()">CALCULATE</button>
+            <button class="clear-btn" onclick="clearCalc()">CLEAR</button>
+        </div>
+        <p style="font-size: 0.6rem; color: #555; text-align: center; margin-top: 10px;">* အကွက် ၂ ခု ဖြည့်ပြီး CALCULATE နှိပ်ပါ။</p>
+    </div>
+
+    <div id="promo-section">
+        <img id="promo-banner" src="" alt="Promo">
+        <div id="promo-text"></div>
+    </div>
+
+    <div class="floating-container">
+        <a href="viber://chat?number=09xxxxxxx" class="fab viber"><i class="fab fa-viber"></i></a>
+        <a href="https://t.me/yourid" class="fab telegram"><i class="fab fa-telegram"></i></a>
+        <a href="https://m.me/yourpage" class="fab messenger"><i class="fab fa-facebook-messenger"></i></a>
+    </div>
+
+    <script>
+        function updateClock() { document.getElementById('live-clock').innerText = new Date().toLocaleString(); }
+        setInterval(updateClock, 1000);
+
+        function loadData() {
+            const officialRate = parseFloat(localStorage.getItem('liveRate')) || 130;
+            const statusText = localStorage.getItem('statusText') || 'ယနေ့ နေ့လည် ၁၂ နာရီဈေး';
+            const bannerUrl = localStorage.getItem('promoBanner');
+            const announcement = localStorage.getItem('promoText');
+            
+            document.getElementById('admin-status').innerText = statusText;
+            document.getElementById('thb-to-mmk-display').innerText = `1 THB - ${officialRate} MMK`;
+            document.getElementById('mmk-to-thb-display').innerText = `100,000 MMK - ${(100000 / officialRate).toFixed(2)} THB`;
+            
+            if(bannerUrl) { document.getElementById('promo-banner').src = bannerUrl; document.getElementById('promo-banner').style.display = 'block'; }
+            if(announcement) { document.getElementById('promo-text').innerText = announcement; document.getElementById('promo-text').style.display = 'block'; }
+
+            document.getElementById('calc-rate').value = officialRate;
+        }
+
+        function performSmartCalc() {
+            const rInput = document.getElementById('calc-rate');
+            const tInput = document.getElementById('calc-thb');
+            const mInput = document.getElementById('calc-mmk');
+
+            const r = parseFloat(rInput.value);
+            const t = parseFloat(tInput.value);
+            const m = parseFloat(mInput.value);
+
+            // Logic: ဖြည့်ထားတဲ့ အကွက် ၂ ခုပေါ် မူတည်ပြီး ကျန် ၁ ခုကို တွက်မယ်
+            
+            // ၁။ Rate နဲ့ THB ရှိရင် MMK ကို တွက်မယ်
+            if (r && t && !m) {
+                mInput.value = (t * r).toFixed(2);
+            }
+            // ၂။ Rate နဲ့ MMK ရှိရင် THB ကို တွက်မယ်
+            else if (r && m && !t) {
+                tInput.value = (m / r).toFixed(2);
+            }
+            // ၃။ THB နဲ့ MMK ရှိရင် Rate ကို တွက်မယ်
+            else if (t && m && !r) {
+                rInput.value = (m / t).toFixed(2);
+            }
+            // ၄။ အကုန်ဖြည့်ထားရင် THB နဲ့ Rate ကို အခြေခံပြီး MMK ကို Update လုပ်မယ် (Default behaviour)
+            else if (r && t && m) {
+                mInput.value = (t * r).toFixed(2);
+            }
+        }
+
+        function clearCalc() {
+            document.getElementById('calc-thb').value = '';
+            document.getElementById('calc-mmk').value = '';
+            // Rate ကိုတော့ Official Rate အတိုင်း ပြန်ထားပေးမယ်
+            document.getElementById('calc-rate').value = localStorage.getItem('liveRate') || 130;
+        }
+
+        window.onload = loadData;
+        updateClock();
+    </script>
+</body>
+</html>
