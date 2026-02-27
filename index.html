@@ -33,7 +33,7 @@
             box-sizing: border-box;
         }
 
-        #admin-status { font-size: 0.9rem; color: var(--led-yellow); margin-bottom: 12px; font-weight: bold; text-shadow: 0 0 5px var(--led-yellow); }
+        #status-title { font-size: 0.9rem; color: var(--led-yellow); margin-bottom: 12px; font-weight: bold; text-shadow: 0 0 5px var(--led-yellow); }
         .price-title { font-size: 0.75rem; margin-bottom: 10px; color: #bbb; }
         
         .price-value {
@@ -69,17 +69,11 @@
         }
         .rate-input { color: var(--led-yellow); border-color: rgba(255, 235, 59, 0.3); }
 
-        /* Calculate & Clear Buttons */
         .btn-container { display: flex; gap: 10px; width: 92%; margin: 15px auto 0; }
         .calc-btn { flex: 2; padding: 12px; background: var(--led-green); color: #000; border: none; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer; }
         .clear-btn { flex: 1; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        /* Promo Section */
-        #promo-section { width: 90%; max-width: 350px; margin-bottom: 80px; text-align: center; }
-        #promo-banner { width: 100%; border-radius: 10px; margin-bottom: 12px; display: none; }
-        #promo-text { font-size: 0.85rem; color: #eee; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border-left: 3px solid var(--led-yellow); display: none; text-align: left; }
-
-        /* Floating Icon (Telegram Only) */
+        /* Floating Icon */
         .floating-container { position: fixed; bottom: 25px; right: 20px; z-index: 100; }
         .fab { 
             width: 55px; height: 55px; border-radius: 50%; 
@@ -89,7 +83,6 @@
             background: var(--telegram);
             transition: transform 0.3s;
         }
-        .fab:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
@@ -100,9 +93,9 @@
     </div>
 
     <div class="price-card">
-        <div id="admin-status">ယနေ့ နေ့လည် ၁၂ နာရီဈေး</div>
-        <div class="price-title">ယနေ့ ငွေလဲနှုန်းထားများ</div>
-        <div class="price-value" id="thb-to-mmk-display">1 THB - 130 MMK</div>
+        <div id="status-title">ယနေ့ ပေါက်ဈေး</div>
+        <div class="price-title">THB - MMK လဲလှယ်နှုန်း</div>
+        <div class="price-value" id="thb-to-mmk-display">1 THB - 126.5 MMK</div>
         <div style="height: 1px; background: rgba(0, 255, 65, 0.15); width: 40%; margin: 8px auto;"></div>
         <div class="price-value" id="mmk-to-thb-display">100,000 MMK - 769.23 THB</div>
     </div>
@@ -111,30 +104,24 @@
         <h3>SMART CALCULATOR</h3>
         
         <div class="input-group">
-            <span class="input-label">Custom Rate (1 THB - ? MMK)</span>
-            <input type="number" step="0.01" id="calc-rate" class="calc-input rate-input" placeholder="0.00">
+            <span class="input-label">လဲလှယ်နှုန်း (1 THB - ? MMK)</span>
+            <input type="number" step="0.01" id="calc-rate" class="calc-input rate-input" value="130">
         </div>
 
         <div class="input-group">
-            <span class="input-label">Thai Baht (THB)</span>
+            <span class="input-label">ဘတ် (Thai Baht)</span>
             <input type="number" step="0.01" id="calc-thb" class="calc-input" placeholder="0.00">
         </div>
 
         <div class="input-group">
-            <span class="input-label">Myanmar Kyat (MMK)</span>
+            <span class="input-label">ကျပ် (Myanmar Kyat)</span>
             <input type="number" step="0.01" id="calc-mmk" class="calc-input" placeholder="0.00">
         </div>
 
         <div class="btn-container">
-            <button class="calc-btn" onclick="performSmartCalc()">CALCULATE</button>
-            <button class="clear-btn" onclick="clearCalc()">CLEAR</button>
+            <button class="calc-btn" onclick="performSmartCalc()">တွက်မည်</button>
+            <button class="clear-btn" onclick="clearCalc()">ဖျက်မည်</button>
         </div>
-        <p style="font-size: 0.6rem; color: #555; text-align: center; margin-top: 10px;">* အကွက် ၂ ခု ဖြည့်ပြီး CALCULATE နှိပ်ပါ။</p>
-    </div>
-
-    <div id="promo-section">
-        <img id="promo-banner" src="" alt="Promo">
-        <div id="promo-text"></div>
     </div>
 
     <div class="floating-container">
@@ -142,44 +129,36 @@
     </div>
 
     <script>
-        function updateClock() { document.getElementById('live-clock').innerText = new Date().toLocaleString(); }
-        setInterval(updateClock, 1000);
+        // ဒီနေရာမှာ ပေါက်ဈေးကို ပြောင်းလဲနိုင်ပါတယ်
+        const CURRENT_RATE = 126.5; 
+        const STATUS_TEXT = "ယနေ့ ပေါက်ဈေး";
 
-        function loadData() {
-            const officialRate = parseFloat(localStorage.getItem('liveRate')) || 130;
-            const statusText = localStorage.getItem('statusText') || 'ယနေ့ နေ့လည် ၁၂ နာရီဈေး';
-            const bannerUrl = localStorage.getItem('promoBanner');
-            const announcement = localStorage.getItem('promoText');
-            
-            document.getElementById('admin-status').innerText = statusText;
-            document.getElementById('thb-to-mmk-display').innerText = `1 THB - ${officialRate} MMK`;
-            document.getElementById('mmk-to-thb-display').innerText = `100,000 MMK - ${(100000 / officialRate).toFixed(2)} THB`;
-            
-            if(bannerUrl) { document.getElementById('promo-banner').src = bannerUrl; document.getElementById('promo-banner').style.display = 'block'; }
-            if(announcement) { document.getElementById('promo-text').innerText = announcement; document.getElementById('promo-text').style.display = 'block'; }
+        function updateClock() { 
+            const now = new Date();
+            document.getElementById('live-clock').innerText = now.toLocaleString(); 
+        }
 
-            document.getElementById('calc-rate').value = officialRate;
+        function initData() {
+            document.getElementById('status-title').innerText = STATUS_TEXT;
+            document.getElementById('thb-to-mmk-display').innerText = `1 THB - ${CURRENT_RATE} MMK`;
+            document.getElementById('mmk-to-thb-display').innerText = `100,000 MMK - ${(100000 / CURRENT_RATE).toFixed(2)} THB`;
+            document.getElementById('calc-rate').value = CURRENT_RATE;
         }
 
         function performSmartCalc() {
-            const rInput = document.getElementById('calc-rate');
+            const r = parseFloat(document.getElementById('calc-rate').value);
             const tInput = document.getElementById('calc-thb');
             const mInput = document.getElementById('calc-mmk');
-
-            const r = parseFloat(rInput.value);
+            
             const t = parseFloat(tInput.value);
             const m = parseFloat(mInput.value);
 
-            if (r && t && !m) {
+            if (r && t && !mInput.value) {
                 mInput.value = (t * r).toFixed(2);
-            }
-            else if (r && m && !t) {
+            } else if (r && m && !tInput.value) {
                 tInput.value = (m / r).toFixed(2);
-            }
-            else if (t && m && !r) {
-                rInput.value = (m / t).toFixed(2);
-            }
-            else if (r && t && m) {
+            } else if (t && m) {
+                // အကယ်၍ နှစ်ခုလုံးရှိနေရင် ဘတ်ကို အခြေခံပြီး ကျပ်ကို ပြန်တွက်ပေးမယ်
                 mInput.value = (t * r).toFixed(2);
             }
         }
@@ -187,11 +166,15 @@
         function clearCalc() {
             document.getElementById('calc-thb').value = '';
             document.getElementById('calc-mmk').value = '';
-            document.getElementById('calc-rate').value = localStorage.getItem('liveRate') || 130;
+            document.getElementById('calc-rate').value = CURRENT_RATE;
         }
 
-        window.onload = loadData;
-        updateClock();
+        window.onload = () => {
+            initData();
+            setInterval(updateClock, 1000);
+            updateClock();
+        };
     </script>
 </body>
 </html>
+
