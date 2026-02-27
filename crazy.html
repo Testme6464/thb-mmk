@@ -1,1 +1,87 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login - Thai-MMK</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; background: #0a0a1a; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: white; }
+        .admin-box, .login-box { background: #161625; padding: 25px; border-radius: 12px; width: 330px; text-align: center; border: 1.5px solid #00ff41; box-sizing: border-box; }
+        h3 { color: #00ff41; margin-top: 0; font-size: 1.1rem; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        label { font-size: 0.8rem; color: #aaa; display: block; margin-top: 15px; text-align: left; }
+        input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #333; border-radius: 8px; background: #000; color: #00ff41; font-size: 0.9rem; box-sizing: border-box; outline: none; }
+        button { width: 100%; padding: 15px; background: #00ff41; color: #000; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 25px; box-shadow: 0 5px 15px rgba(0,255,65,0.3); }
+        
+        /* Login ပိတ်ထားရန် */
+        #admin-content { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="login-form" class="login-box">
+        <h3>ADMIN LOGIN</h3>
+        <label>Enter Password</label>
+        <input type="password" id="login-pass" placeholder="Password ရိုက်ပါ">
+        <button onclick="checkLogin()">LOGIN</button>
+        <p id="error-msg" style="color: #e74c3c; font-size: 0.8rem; margin-top: 10px; display: none;">စကားဝှက် မှားယွင်းနေပါသည်။</p>
+    </div>
+
+    <div id="admin-content" class="admin-box">
+        <h3>ADMIN CONTROL</h3>
+        <label>Status (ဥပမာ - ၁၂ နာရီဈေး)</label>
+        <input type="text" id="status-input">
+        <label>Official Rate (1 THB = ? MMK)</label>
+        <input type="number" step="0.01" id="rate-input">
+        <label>Promo Banner URL (ပုံ Link)</label>
+        <input type="text" id="banner-input">
+        <label>Announcement (ကြော်ငြာစာများ)</label>
+        <textarea id="text-input" style="height: 60px;"></textarea>
+        <button onclick="saveAll()">UPDATE WEBSITE</button>
+        <button onclick="logout()" style="background: #333; color: white; margin-top: 10px; padding: 10px;">LOGOUT</button>
+    </div>
+
+    <script>
+        const MASTER_PASS = "555444"; // ဤနေရာတွင် Password ကို စိတ်ကြိုက်ပြောင်းပါ
+
+        function checkLogin() {
+            const inputPass = document.getElementById('login-pass').value;
+            if (inputPass === MASTER_PASS) {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('admin-content').style.display = 'block';
+                // Login အောင်မြင်ကြောင်း ခေတ္တသိမ်းထားမည်
+                sessionStorage.setItem('isAdmin', 'true');
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        }
+
+        // Page Refresh လုပ်လျှင်လည်း Login ပြန်မတောင်းစေရန်
+        window.onload = function() {
+            if (sessionStorage.getItem('isAdmin') === 'true') {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('admin-content').style.display = 'block';
+            }
+            // ရှိပြီးသား Data များ ပြန်ဖြည့်ထားခြင်း
+            document.getElementById('status-input').value = localStorage.getItem('statusText') || '';
+            document.getElementById('rate-input').value = localStorage.getItem('liveRate') || '';
+            document.getElementById('banner-input').value = localStorage.getItem('promoBanner') || '';
+            document.getElementById('text-input').value = localStorage.getItem('promoText') || '';
+        }
+
+        function saveAll() {
+            localStorage.setItem('statusText', document.getElementById('status-input').value);
+            localStorage.setItem('liveRate', document.getElementById('rate-input').value);
+            localStorage.setItem('promoBanner', document.getElementById('banner-input').value);
+            localStorage.setItem('promoText', document.getElementById('text-input').value);
+            alert('အားလုံး အောင်မြင်စွာ ပြင်ဆင်ပြီးပါပြီ။');
+            window.location.reload();
+        }
+
+        function logout() {
+            sessionStorage.removeItem('isAdmin');
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>
 
