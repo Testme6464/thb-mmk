@@ -22,7 +22,6 @@
         .header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; letter-spacing: 2px; }
         #live-clock { font-size: 0.75rem; font-family: 'Orbitron', sans-serif; color: var(--led-green); opacity: 0.7; }
 
-        /* Price Card */
         .price-card {
             background: rgba(0, 0, 0, 0.5);
             width: 90%; max-width: 350px;
@@ -46,7 +45,6 @@
             display: block; margin: 8px 0;
         }
 
-        /* Smart Calculator Section */
         .calc-section {
             background: rgba(255, 255, 255, 0.03);
             width: 90%; max-width: 350px;
@@ -73,7 +71,6 @@
         .calc-btn { flex: 2; padding: 12px; background: var(--led-green); color: #000; border: none; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer; }
         .clear-btn { flex: 1; padding: 12px; background: #e74c3c; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-        /* Floating Icon */
         .floating-container { position: fixed; bottom: 25px; right: 20px; z-index: 100; }
         .fab { 
             width: 55px; height: 55px; border-radius: 50%; 
@@ -81,7 +78,6 @@
             color: white; text-decoration: none; font-size: 28px; 
             box-shadow: 0 8px 20px rgba(0,0,0,0.5);
             background: var(--telegram);
-            transition: transform 0.3s;
         }
     </style>
 </head>
@@ -95,7 +91,7 @@
     <div class="price-card">
         <div id="status-title">ယနေ့ ပေါက်ဈေး</div>
         <div class="price-title">THB - MMK လဲလှယ်နှုန်း</div>
-        <div class="price-value" id="thb-to-mmk-display">1 THB - 126.5 MMK</div>
+        <div class="price-value" id="thb-to-mmk-display">1 THB - 130 MMK</div>
         <div style="height: 1px; background: rgba(0, 255, 65, 0.15); width: 40%; margin: 8px auto;"></div>
         <div class="price-value" id="mmk-to-thb-display">100,000 MMK - 769.23 THB</div>
     </div>
@@ -129,9 +125,7 @@
     </div>
 
     <script>
-        // ဒီနေရာမှာ ပေါက်ဈေးကို ပြောင်းလဲနိုင်ပါတယ်
-        const CURRENT_RATE = 126.5; 
-        const STATUS_TEXT = "ယနေ့ ပေါက်ဈေး";
+        const DEFAULT_RATE = 126.5; 
 
         function updateClock() { 
             const now = new Date();
@@ -139,26 +133,34 @@
         }
 
         function initData() {
-            document.getElementById('status-title').innerText = STATUS_TEXT;
-            document.getElementById('thb-to-mmk-display').innerText = `1 THB - ${CURRENT_RATE} MMK`;
-            document.getElementById('mmk-to-thb-display').innerText = `100,000 MMK - ${(100000 / CURRENT_RATE).toFixed(2)} THB`;
-            document.getElementById('calc-rate').value = CURRENT_RATE;
+            document.getElementById('thb-to-mmk-display').innerText = `1 THB - ${DEFAULT_RATE} MMK`;
+            document.getElementById('mmk-to-thb-display').innerText = `100,000 MMK - ${(100000 / DEFAULT_RATE).toFixed(2)} THB`;
+            document.getElementById('calc-rate').value = DEFAULT_RATE;
         }
 
         function performSmartCalc() {
-            const r = parseFloat(document.getElementById('calc-rate').value);
+            const rInput = document.getElementById('calc-rate');
             const tInput = document.getElementById('calc-thb');
             const mInput = document.getElementById('calc-mmk');
-            
+
+            const r = parseFloat(rInput.value);
             const t = parseFloat(tInput.value);
             const m = parseFloat(mInput.value);
 
-            if (r && t && !mInput.value) {
+            // ၁။ Rate နဲ့ Baht ရှိပြီး ကျပ်အကွက် လွတ်နေလျှင် (သို့မဟုတ်) အကုန်ဖြည့်ထားလျှင် (Kyat ကို တွက်ပေးမည်)
+            if (!isNaN(r) && !isNaN(t) && (isNaN(m) || mInput.value === "")) {
                 mInput.value = (t * r).toFixed(2);
-            } else if (r && m && !tInput.value) {
+            } 
+            // ၂။ Rate နဲ့ Kyat ရှိပြီး Baht အကွက် လွတ်နေလျှင်
+            else if (!isNaN(r) && !isNaN(m) && (isNaN(t) || tInput.value === "")) {
                 tInput.value = (m / r).toFixed(2);
-            } else if (t && m) {
-                // အကယ်၍ နှစ်ခုလုံးရှိနေရင် ဘတ်ကို အခြေခံပြီး ကျပ်ကို ပြန်တွက်ပေးမယ်
+            }
+            // ၃။ Baht နဲ့ Kyat ရှိပြီး Rate အကွက် လွတ်နေလျှင်
+            else if (!isNaN(t) && !isNaN(m) && (isNaN(r) || rInput.value === "")) {
+                rInput.value = (m / t).toFixed(2);
+            }
+            // ၄။ အကုန်ဖြည့်ထားရင် Default အနေနဲ့ Baht ကို အခြေခံပြီး Kyat ကို Update လုပ်ပေးမည်
+            else if (!isNaN(r) && !isNaN(t) && !isNaN(m)) {
                 mInput.value = (t * r).toFixed(2);
             }
         }
@@ -166,7 +168,7 @@
         function clearCalc() {
             document.getElementById('calc-thb').value = '';
             document.getElementById('calc-mmk').value = '';
-            document.getElementById('calc-rate').value = CURRENT_RATE;
+            document.getElementById('calc-rate').value = DEFAULT_RATE;
         }
 
         window.onload = () => {
@@ -177,4 +179,3 @@
     </script>
 </body>
 </html>
-
