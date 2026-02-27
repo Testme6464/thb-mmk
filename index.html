@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Pyidaungsu:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --viber: #7360f2; --telegram: #0088cc; --messenger: #0084ff; --led-green: #00ff41; --led-yellow: #ffeb3b; }
+        :root { --telegram: #0088cc; --led-green: #00ff41; --led-yellow: #ffeb3b; }
         
         body {
             font-family: 'Pyidaungsu', sans-serif;
@@ -79,10 +79,17 @@
         #promo-banner { width: 100%; border-radius: 10px; margin-bottom: 12px; display: none; }
         #promo-text { font-size: 0.85rem; color: #eee; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border-left: 3px solid var(--led-yellow); display: none; text-align: left; }
 
-        /* Floating Icons */
-        .floating-container { position: fixed; bottom: 20px; right: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
-        .fab { width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; text-decoration: none; font-size: 22px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .viber { background: var(--viber); } .telegram { background: var(--telegram); } .messenger { background: var(--messenger); }
+        /* Floating Icon (Telegram Only) */
+        .floating-container { position: fixed; bottom: 25px; right: 20px; z-index: 100; }
+        .fab { 
+            width: 55px; height: 55px; border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; 
+            color: white; text-decoration: none; font-size: 28px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            background: var(--telegram);
+            transition: transform 0.3s;
+        }
+        .fab:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
@@ -131,9 +138,7 @@
     </div>
 
     <div class="floating-container">
-        <a href="viber://chat?number=09xxxxxxx" class="fab viber"><i class="fab fa-viber"></i></a>
-        <a href="https://t.me/yourid" class="fab telegram"><i class="fab fa-telegram"></i></a>
-        <a href="https://m.me/yourpage" class="fab messenger"><i class="fab fa-facebook-messenger"></i></a>
+        <a href="https://t.me/lordofygn" target="_blank" class="fab"><i class="fab fa-telegram"></i></a>
     </div>
 
     <script>
@@ -165,21 +170,15 @@
             const t = parseFloat(tInput.value);
             const m = parseFloat(mInput.value);
 
-            // Logic: ဖြည့်ထားတဲ့ အကွက် ၂ ခုပေါ် မူတည်ပြီး ကျန် ၁ ခုကို တွက်မယ်
-            
-            // ၁။ Rate နဲ့ THB ရှိရင် MMK ကို တွက်မယ်
             if (r && t && !m) {
                 mInput.value = (t * r).toFixed(2);
             }
-            // ၂။ Rate နဲ့ MMK ရှိရင် THB ကို တွက်မယ်
             else if (r && m && !t) {
                 tInput.value = (m / r).toFixed(2);
             }
-            // ၃။ THB နဲ့ MMK ရှိရင် Rate ကို တွက်မယ်
             else if (t && m && !r) {
                 rInput.value = (m / t).toFixed(2);
             }
-            // ၄။ အကုန်ဖြည့်ထားရင် THB နဲ့ Rate ကို အခြေခံပြီး MMK ကို Update လုပ်မယ် (Default behaviour)
             else if (r && t && m) {
                 mInput.value = (t * r).toFixed(2);
             }
@@ -188,7 +187,6 @@
         function clearCalc() {
             document.getElementById('calc-thb').value = '';
             document.getElementById('calc-mmk').value = '';
-            // Rate ကိုတော့ Official Rate အတိုင်း ပြန်ထားပေးမယ်
             document.getElementById('calc-rate').value = localStorage.getItem('liveRate') || 130;
         }
 
